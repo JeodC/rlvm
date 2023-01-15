@@ -16,6 +16,8 @@ AddOption('--pprof', action='store_true',
           help='Build with Google\'s performance tools.')
 AddOption('--fullstatic', action='store_true',
           help='Builds a static binary, linking in all libraries.')
+AddOption('--puresdl', action='store_true',
+          help='Builds a release that only uses sdl, no gtk')
 
 # Set libraries used by all configurations and all binaries in rlvm.
 env = Environment(
@@ -376,7 +378,12 @@ env.SConscript("SConscript",
                exports='env')
 
 # Run the correct port script. If we're on darwin, we'll run the cocoa version,
-# everywhere else we assume GTK+.
+# everywhere else we assume GTK+, unless you use the option --puresdl.
+if GetOption("puresdl"):
+  env.SConscript("SConscript.sdl",
+                 variant_dir="$BUILD_DIR/",
+                 duplicate=0,
+                 exports='env')
 if env['PLATFORM'] == 'darwin':
   env.SConscript("SConscript.cocoa",
                  variant_dir="$BUILD_DIR/",
