@@ -384,7 +384,7 @@ if GetOption("puresdl"):
                  variant_dir="$BUILD_DIR/",
                  duplicate=0,
                  exports='env')
-if env['PLATFORM'] == 'darwin':
+elif env['PLATFORM'] == 'darwin':
   env.SConscript("SConscript.cocoa",
                  variant_dir="$BUILD_DIR/",
                  duplicate=0,
