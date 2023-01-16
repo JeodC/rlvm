@@ -73,7 +73,7 @@ boost::filesystem::path SDLRLVMInstance::SelectGameDirectory() {
   */
 
   // TODO:
-  return fs::path("gamedir/");
+  return fs::path("games/");
 }
 
 void SDLRLVMInstance::ReportFatalError(const std::string& message_text,

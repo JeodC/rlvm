@@ -67,7 +67,14 @@ char* EnsureDataIsCorrectBitrate(char* incoming_data, int* length) {
   fwrite(incoming_data, *length, 1, infile);
   fclose(infile);
 
-  zresample_main(infile_name.c_str(), outfile_name.c_str(), WAVFILE::freq);
+  if (zresample_main(infile_name.c_str(), outfile_name.c_str(), WAVFILE::freq)) {
+    std::cerr << "Warning! Failed to perform audio conversion."
+              << std::endl;
+    unlink(infile_name.c_str());
+    unlink(outfile_name.c_str());
+    rmdir(tmp_dirname);
+    return incoming_data;
+  }
 
   FILE* f = fopen(outfile_name.c_str(), "rb");
   fseek(f, 0, SEEK_END);

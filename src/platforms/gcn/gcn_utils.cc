@@ -103,6 +103,7 @@ static SDL_Surface* convertToStandardFormat(SDL_Surface* surface) {
 
 static gcn::Image* buildThemeGCNImageFrom(SDL_Surface* loadedSurface) {
   if (loadedSurface == NULL) {
+    printf("%s: Unable to theme image: %s\n", __FILE__, IMG_GetError());
     throw GCN_EXCEPTION(std::string("Unable to theme image"));
   }
 

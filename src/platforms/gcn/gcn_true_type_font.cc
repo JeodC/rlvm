@@ -103,6 +103,10 @@ void GCNTrueTypeFont::drawString(gcn::Graphics* graphics,
     } else {
       textSurface = TTF_RenderUTF8_Solid(font_, text.c_str(), sdlCol);
     }
+    if (!textSurface) {
+      printf("::drawString: Failed to draw '%s' (%d): %s\n", text.c_str(), anti_alias_, TTF_GetError());
+      return;
+    }
 
     SDL_LockSurface(textSurface);
     {

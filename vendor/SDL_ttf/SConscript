@@ -5,6 +5,13 @@ component_env.Append(
   CPPPATH = [
     "#/vendor/SDL_ttf/include"
   ],
+
+  CFLAGS = [
+    # Ignore all warnings in this upstream code.
+    "-w",
+    "-g",
+    "-O0"
+  ]
 )
 
 libsdl_ttf_files = [
