@@ -7,8 +7,7 @@ root_env.ParseConfig('sdl-config --cflags --libs')
 root_env.Append(
   CXXFLAGS = [
     "--ansi",
-    "-std=c++11"
-  ]
+    "-std=c++11"  ]
 )
 
 sdlrlvm_files = [

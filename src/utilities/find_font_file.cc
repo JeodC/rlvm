@@ -36,6 +36,73 @@
 
 namespace fs = boost::filesystem;
 
+// -----------------------------------------------------------------------
+// PORTMASTER HACKS!
+// -----------------------------------------------------------------------
+#if defined(PLATFORM_PORTMASTER)
+
+fs::path FindFontFile(System& system) {
+  Gameexe& gexe = system.gameexe();
+
+  if (gexe.Exists("__GAMEFONT")) {
+    std::string gamefontstr = gexe("__GAMEFONT");
+    fs::path gameFont = fs::path(gamefontstr);
+    printf("Testing for specified font %s - ", gameFont.c_str());
+    if (fs::exists(gameFont)) {
+      printf("found\n");
+      return gameFont;
+    }
+    printf("not found\n");
+  }
+
+  if (gexe.Exists("__GAMEPATH")) {
+    std::string gamepath = gexe("__GAMEPATH");
+    fs::path gamePathFont = fs::path(gamepath) / "msgothic.ttc";
+    printf("Testing for game font %s - ", gamePathFont.c_str());
+    if (fs::exists(gamePathFont)) {
+      printf("found\n");
+      return gamePathFont;
+    }
+    printf("not found\n");
+  }
+
+  char* homeptr = getenv("HOME");
+  fs::path home;
+
+  if (homeptr != 0)
+    home = fs::path(homeptr) / "fonts";
+  else
+    home = fs::path() / "fonts";
+
+  fs::path filePath = home / "msgothic.ttc";
+  printf("Testing for %s - ", filePath.c_str());
+
+  if (fs::exists(filePath)) {
+    printf("found\n");
+    return filePath;
+  }
+
+  printf("not found\n");
+  if (system.use_western_font())
+    filePath = home / "DejaVuSans.ttf";
+  else
+    filePath = home / "sazanami-gothic.ttf";
+
+  printf("Testing for %s - ", filePath.c_str());
+  if (fs::exists(filePath)) {
+    printf("found\n");
+    return filePath;
+  }
+  printf("not found\n");
+
+  return home;
+}
+
+// -----------------------------------------------------------------------
+// Normal stuff
+// -----------------------------------------------------------------------
+#else
+
 const char* western_platform_fonts[] = {
 #if defined(__APPLE__)
     // I would prefer Helvetica except that it is stored as a dfont. :(
@@ -113,16 +180,26 @@ fs::path FindFontFile(System& system) {
   if (system.use_western_font()) {
     // Try to look up a western alternative font.
     for (const char** file = western_platform_fonts; *file; ++file) {
-      if (fs::exists(*file))
+      printf("[WF] Testing '%s'", *file);
+      if (fs::exists(*file)) {
+        printf(" - Found!\n");
         return fs::path(*file);
+      }
+      printf("\n");
     }
   }
 
   // Look up platform specific Japanese alternatives.
   for (const char** file = ja_platform_fonts; *file; ++file) {
-    if (fs::exists(*file))
+    printf("[JP] Testing '%s'", *file);
+    if (fs::exists(*file)) {
+      printf(" - Found!\n");
       return fs::path(*file);
+    }
+    printf("\n");
   }
 
   return FindFontFileFinal(system.gameexe(), "msgothic.ttc");
 }
+
+#endif

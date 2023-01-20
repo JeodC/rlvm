@@ -376,7 +376,11 @@ std::string System::Regname() {
 }
 
 boost::filesystem::path System::GameSaveDirectory() {
+#ifdef PLATFORM_PORTMASTER
+  fs::path base_dir = GetHomeDirectory() / "save" / Regname();
+#else
   fs::path base_dir = GetHomeDirectory() / ".rlvm" / Regname();
+#endif
   fs::create_directories(base_dir);
 
   return base_dir;

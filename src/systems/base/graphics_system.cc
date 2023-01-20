@@ -876,8 +876,30 @@ std::shared_ptr<MouseCursor> GraphicsSystem::GetCurrentCursor() {
 // -----------------------------------------------------------------------
 
 void GraphicsSystem::SetScreenSize(const Size& size) {
+// #ifdef PLATFORM_PORTMASTER
+//   Size new_size(size.width(), size.height());
+//   char *value;
+//   std::string value_str;
+
+//   value=getenv("MAX_WIDTH");
+//   if (value != 0 && ((value_str = value) != "")) {
+//     int temp = atoi(value_str.c_str());
+//     if ((temp > 0) && (new_size.width() > temp))
+//       new_size.set_width(temp);
+//   }
+//   value=getenv("MAX_HEIGHT");
+//   if (value != 0 && ((value_str = value) != "")) {
+//     int temp = atoi(value_str.c_str());
+//     if ((temp > 0) && (new_size.height() > temp))
+//       new_size.set_height(temp);
+//   }
+
+//   screen_size_ = new_size;
+//   screen_rect_ = Rect(Point(0, 0), new_size);
+// #else
   screen_size_ = size;
   screen_rect_ = Rect(Point(0, 0), size);
+// #endif
 }
 
 // -----------------------------------------------------------------------

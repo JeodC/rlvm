@@ -18,6 +18,8 @@ AddOption('--fullstatic', action='store_true',
           help='Builds a static binary, linking in all libraries.')
 AddOption('--puresdl', action='store_true',
           help='Builds a release that only uses sdl, no gtk')
+AddOption('--portmaster', action='store_true',
+          help='Builds a version with hacks to work inf PortMaster')
 
 # Set libraries used by all configurations and all binaries in rlvm.
 env = Environment(
@@ -297,6 +299,12 @@ env = config.Finish()
 ### called or else we get a really confusing error.
 if env['PLATFORM'] == 'darwin':
   env.Append(LIBS=["SDL", "intl", "iconv"])
+
+#########################################################################
+## Enable PortmMster hacks.
+#########################################################################
+if GetOption("portmaster"):
+  env.Append(CPPDEFINES=['PLATFORM_PORTMASTER'])
 
 #########################################################################
 ## Building subcomponent functions
