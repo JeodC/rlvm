@@ -146,7 +146,12 @@ GCNSaveLoadWindow::GCNSaveLoadWindow(RLMachine& machine,
     : GCNWindow(platform),
       model_(new SaveGameListModel("NO DATA", machine)),
       type_(type) {
+
+#ifdef PLATFORM_PORTMASTER
+  setSize((int)(540.0 * platform->scale()), (int)(400.0 * platform->scale()));
+#else
   setSize(540, 400);
+#endif
 
   // Either the save/load button
   action_button_ = new GCNButton();

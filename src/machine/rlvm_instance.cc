@@ -39,7 +39,7 @@
 #include "modules/module_sys_save.h"
 #include "modules/modules.h"
 // Temporarily disable guichan for the SDL2 porting.
-//#include "platforms/gcn/gcn_platform.h"
+#include "platforms/gcn/gcn_platform.h"
 #include "systems/base/event_system.h"
 #include "systems/base/graphics_system.h"
 #include "systems/base/system_error.h"
@@ -128,9 +128,19 @@ void RLVMInstance::Run(const boost::filesystem::path& gamerootPath) {
 
     // Initialize our platform dialogs (we have to do this after
     // looking for a font because we use that font internally).
-    // std::shared_ptr<GCNPlatform> platform(
-    //     new GCNPlatform(sdlSystem, sdlSystem.graphics().screen_rect()));
-    // sdlSystem.SetPlatform(platform);
+#ifdef PLATFORM_PORTMASTER
+    std::shared_ptr<GCNPlatform> platform(
+        new GCNPlatform(
+          sdlSystem,
+          sdlSystem.graphics().screen_rect(),
+          sdlSystem.graphics().real_screen_scale(),
+          sdlSystem.graphics().real_screen_offset_x(),
+          sdlSystem.graphics().real_screen_offset_y()));
+#else
+    std::shared_ptr<GCNPlatform> platform(
+        new GCNPlatform(sdlSystem, sdlSystem.graphics().screen_rect()));
+#endif
+    sdlSystem.SetPlatform(platform);
 
     if (undefined_opcodes_)
       rlmachine.SetPrintUndefinedOpcodes(true);

@@ -55,7 +55,23 @@ namespace gcn
     {
         mMouseInWindow = true;
         mMouseDown = false;
+#ifdef PLATFORM_PORTMASTER
+        mScale = 1.0;
+        mOffsetX = 0;
+        mOffsetY = 0;
+#endif
     }
+
+#ifdef PLATFORM_PORTMASTER
+    SDLInput::SDLInput(float scale, int offset_x, int offset_y)
+    {
+        mMouseInWindow = true;
+        mMouseDown = false;
+        mScale = scale;
+        mOffsetX = offset_x;
+        mOffsetY = offset_y;
+    }
+#endif
 
     bool SDLInput::isKeyQueueEmpty()
     {
@@ -150,8 +166,13 @@ namespace gcn
 
             case SDL_MOUSEBUTTONDOWN:
                 mMouseDown = true;
+#ifdef PLATFORM_PORTMASTER
+                mouseInput.setX((int)((float)(event.button.x) * mScale) + mOffsetX);
+                mouseInput.setY((int)((float)(event.button.y) * mScale) + mOffsetY);
+#else
                 mouseInput.setX(event.button.x);
                 mouseInput.setY(event.button.y);
+#endif
                 mouseInput.setButton(convertMouseButton(event.button.button));
 
                 if (event.button.button == SDL_BUTTON_WHEELDOWN)
@@ -172,8 +193,19 @@ namespace gcn
 
             case SDL_MOUSEBUTTONUP:
                 mMouseDown = false;
+#ifdef PLATFORM_PORTMASTER
+                printf("Button -> %d x %d -> %d x %d\n",
+                  event.button.x, event.button.y,
+                  (int)((float)(event.button.x) * mScale) + mOffsetX,
+                  (int)((float)(event.button.y) * mScale) + mOffsetY
+                  );
+
+                mouseInput.setX((int)((float)(event.button.x) * mScale) + mOffsetX);
+                mouseInput.setY((int)((float)(event.button.y) * mScale) + mOffsetY);
+#else
                 mouseInput.setX(event.button.x);
                 mouseInput.setY(event.button.y);
+#endif
                 mouseInput.setButton(convertMouseButton(event.button.button));
                 mouseInput.setType(MouseInput::RELEASED);
                 mouseInput.setTimeStamp(SDL_GetTicks());
@@ -181,8 +213,13 @@ namespace gcn
                 break;
 
             case SDL_MOUSEMOTION:
+#ifdef PLATFORM_PORTMASTER
+                mouseInput.setX((int)((float)(event.button.x) * mScale) + mOffsetX);
+                mouseInput.setY((int)((float)(event.button.y) * mScale) + mOffsetY);
+#else
                 mouseInput.setX(event.button.x);
                 mouseInput.setY(event.button.y);
+#endif
                 mouseInput.setButton(MouseInput::EMPTY);
                 mouseInput.setType(MouseInput::MOVED);
                 mouseInput.setTimeStamp(SDL_GetTicks());

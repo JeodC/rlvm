@@ -472,13 +472,13 @@ const ObjectSettings& GraphicsSystem::GetObjectSettings(const int obj_num) {
 // -----------------------------------------------------------------------
 
 void GraphicsSystem::Refresh(std::ostream* tree) {
-  BeginFrame();
+  BeginFrame(BFT_SCREEN);
   DrawFrame(tree);
   EndFrame();
 }
 
 std::shared_ptr<Surface> GraphicsSystem::RenderToSurface() {
-  BeginFrame();
+  BeginFrame(BFT_SURFACE);
   DrawFrame(NULL);
   return EndFrameToSurface();
 }
@@ -876,30 +876,47 @@ std::shared_ptr<MouseCursor> GraphicsSystem::GetCurrentCursor() {
 // -----------------------------------------------------------------------
 
 void GraphicsSystem::SetScreenSize(const Size& size) {
-// #ifdef PLATFORM_PORTMASTER
-//   Size new_size(size.width(), size.height());
-//   char *value;
-//   std::string value_str;
+#ifdef PLATFORM_PORTMASTER
+  char *value;
+  std::string value_str;
+  Size temp_size(size.width(), size.height());
 
-//   value=getenv("MAX_WIDTH");
-//   if (value != 0 && ((value_str = value) != "")) {
-//     int temp = atoi(value_str.c_str());
-//     if ((temp > 0) && (new_size.width() > temp))
-//       new_size.set_width(temp);
-//   }
-//   value=getenv("MAX_HEIGHT");
-//   if (value != 0 && ((value_str = value) != "")) {
-//     int temp = atoi(value_str.c_str());
-//     if ((temp > 0) && (new_size.height() > temp))
-//       new_size.set_height(temp);
-//   }
+  value=getenv("PORTMASTER_SCREEN_WIDTH");
+  if (value != 0 && ((value_str = value) != "")) {
+    int temp = atoi(value_str.c_str());
+    if (temp > 0)
+      temp_size.set_width(temp);
+  }
 
-//   screen_size_ = new_size;
-//   screen_rect_ = Rect(Point(0, 0), new_size);
-// #else
+  value=getenv("PORTMASTER_SCREEN_HEIGHT");
+  if (value != 0 && ((value_str = value) != "")) {
+    int temp = atoi(value_str.c_str());
+    if (temp > 0)
+      temp_size.set_height(temp);
+  }
+
+  float scale_w = (float)temp_size.width() / (float)size.width();
+  float scale_h = (float)temp_size.height() / (float)size.height();
+  float scale_w_inv = (float)size.width() / (float)temp_size.width();
+  float scale_h_inv = (float)size.height() / (float)temp_size.height();
+
+  if (scale_w < scale_h) {
+    real_screen_scale_ = scale_w;
+    real_screen_scale_inv_ = scale_w_inv;
+  }
+  else {
+    real_screen_scale_ = scale_h;
+    real_screen_scale_inv_ = scale_h_inv;
+  }
+
+  printf("%dx%d -> %dx%d -> %.3f", size.width(), size.height(), temp_size.width(), temp_size.height(), real_screen_scale_);
+
+  real_screen_size_ = temp_size;
+  real_screen_rect_ = Rect(Point(0, 0), temp_size);
+#endif
+
   screen_size_ = size;
   screen_rect_ = Rect(Point(0, 0), size);
-// #endif
 }
 
 // -----------------------------------------------------------------------

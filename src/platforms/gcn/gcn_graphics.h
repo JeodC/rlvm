@@ -97,6 +97,9 @@ class GCNGraphics : public gcn::OpenGLGraphics {
  public:
   // Initializes the graphics with the current screen resolution.
   GCNGraphics(int width, int height);
+#ifdef PLATFORM_PORTMASTER
+  GCNGraphics(int width, int height, float scale, int offset_x, int offset_y);
+#endif
   ~GCNGraphics();
 
   // Draws a rectangle using images. 4 corner images, 4 side images and 1

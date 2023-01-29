@@ -62,7 +62,7 @@ class SDLGraphicsSystem : public GraphicsSystem, public NotificationObserver {
   // switch on/off the operating system cursor when the cursor index is invalid.
   virtual void SetCursor(int cursor) override;
 
-  virtual void BeginFrame() override;
+  virtual void BeginFrame(BeginFrameType mode) override;
 
   virtual void MarkScreenAsDirty(GraphicsUpdateType type) override;
 

@@ -65,8 +65,8 @@ bool Effect::operator()(RLMachine& machine) {
     return true;
   } else {
     GraphicsSystem& graphics = machine.system().graphics();
-    graphics.BeginFrame();
 
+    graphics.BeginFrame(BFT_SCREEN);      
     if (BlitOriginalImage()) {
       dst_surface().RenderToScreen(
           Rect(Point(0, 0), size()), Rect(Point(0, 0), size()), 255);

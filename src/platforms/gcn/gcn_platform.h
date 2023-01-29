@@ -60,6 +60,10 @@ class GCNPlatform : public Platform,
                     public gcn::KeyListener,
                     public std::enable_shared_from_this<GCNPlatform> {
  public:
+#ifdef PLATFORM_PORTMASTER
+  GCNPlatform(System& system, const Rect& screen_size, const float scale, int offset_x, int offset_y);
+#endif
+
   GCNPlatform(System& system, const Rect& screen_size);
   ~GCNPlatform();
 
@@ -82,6 +86,11 @@ class GCNPlatform : public Platform,
   // Overridden from gcn::KeyListener:
   virtual void keyReleased(gcn::KeyEvent& keyEvent) override;
 
+#ifdef PLATFORM_PORTMASTER
+  float scale() { return scale_; }
+  int offset_x() { return offset_y_; }
+  int offset_y() { return offset_y_; }
+#endif
  private:
   // Blocks the world until we're done.
   void pushBlocker(RLMachine& machine);
@@ -116,6 +125,12 @@ class GCNPlatform : public Platform,
 
   // Used to center dialogs in the window.
   Rect screen_size_;
+
+#ifdef PLATFORM_PORTMASTER
+  float scale_ = 1.0f;
+  int offset_x_ = 0;
+  int offset_y_ = 0;
+#endif
 
   // GUIchan syscom implementation
   //

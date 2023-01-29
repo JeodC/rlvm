@@ -59,7 +59,7 @@ class TestGraphicsSystem : public GraphicsSystem {
   virtual std::shared_ptr<Surface> BuildSurface(const Size& s) override;
   virtual ColourFilter* BuildColourFiller() override;
 
-  virtual void BeginFrame() override;
+  virtual void BeginFrame(BeginFrameType mode) override;
   virtual void EndFrame() override;
   virtual std::shared_ptr<Surface> EndFrameToSurface() override;
 

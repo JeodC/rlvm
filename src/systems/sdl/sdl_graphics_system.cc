@@ -82,7 +82,7 @@ void SDLGraphicsSystem::SetCursor(int cursor) {
   SDL_ShowCursor(ShouldUseCustomCursor() ? SDL_DISABLE : SDL_ENABLE);
 }
 
-void SDLGraphicsSystem::BeginFrame() {
+void SDLGraphicsSystem::BeginFrame(BeginFrameType mode) {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   DebugShowGLErrors();
@@ -105,6 +105,14 @@ void SDLGraphicsSystem::BeginFrame() {
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   DebugShowGLErrors();
+
+#ifdef PLATFORM_PORTMASTER
+  if (mode == BFT_SCREEN) {
+    // Portmaster hack to scale the screen.
+    glTranslatef(real_screen_offset_x(), real_screen_offset_y(), 0);
+    glScalef((GLfloat)real_screen_scale(), (GLfloat)real_screen_scale(), (GLfloat)0.f);
+  }
+#endif
 
   // Full screen shaking moves where the origin is.
   Point origin = GetScreenOrigin();
@@ -139,7 +147,8 @@ void SDLGraphicsSystem::EndFrame() {
                         0,
                         0,
                         screen_size().width(),
-                        screen_size().height());
+                        screen_size().height()
+                        );
     screen_contents_texture_valid_ = true;
   } else {
     screen_contents_texture_valid_ = false;
@@ -351,8 +360,8 @@ void SDLGraphicsSystem::SetupVideo() {
   // cursor.
   glGenTextures(1, &screen_contents_texture_);
   glBindTexture(GL_TEXTURE_2D, screen_contents_texture_);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   screen_tex_width_ = SafeSize(screen_size().width());
   screen_tex_height_ = SafeSize(screen_size().height());
   glTexImage2D(GL_TEXTURE_2D,
@@ -373,6 +382,12 @@ SDLGraphicsSystem::~SDLGraphicsSystem() {}
 void SDLGraphicsSystem::ExecuteGraphicsSystem(RLMachine& machine) {
   // For now, nothing, but later, we need to put all code each cycle
   // here.
+#ifdef PLATFORM_PORTMASTER
+  if (is_responsible_for_update()) {
+    Refresh(NULL);
+    OnScreenRefreshed();
+  }
+#else
   if (is_responsible_for_update() && screen_needs_refresh()) {
     Refresh(NULL);
     OnScreenRefreshed();
@@ -381,6 +396,7 @@ void SDLGraphicsSystem::ExecuteGraphicsSystem(RLMachine& machine) {
     RedrawLastFrame();
     redraw_last_frame_ = false;
   }
+#endif
 
   // Update the seen.
   int current_time = machine.system().event().GetTicks();

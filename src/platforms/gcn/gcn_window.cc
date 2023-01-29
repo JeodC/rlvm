@@ -25,7 +25,7 @@
 // -----------------------------------------------------------------------
 
 #include "platforms/gcn/gcn_window.h"
-
+#include "platforms/gcn/gcn_platform.h"
 #include "platforms/gcn/gcn_utils.h"
 #include "systems/base/rect.h"
 
@@ -45,8 +45,14 @@ GCNWindow::~GCNWindow() {}
 // -----------------------------------------------------------------------
 
 void GCNWindow::centerInWindow(const Size& screen_size) {
+#ifdef PLATFORM_PORTMASTER
+  setPosition(
+    (int)(((float)(screen_size.width()) / 2) - (((float)(getWidth()) / platform_->scale()) / 2)) + platform_->offset_x(),
+    (int)(((float)(screen_size.height()) / 2) - (((float)(getHeight()) / platform_->scale()) / 2)) + platform_->offset_y());
+#else
   setPosition((screen_size.width() / 2) - (getWidth() / 2),
               (screen_size.height() / 2) - (getHeight() / 2));
+#endif
 }
 
 // -----------------------------------------------------------------------

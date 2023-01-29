@@ -117,6 +117,13 @@ enum GraphicsUpdateType {
   GUT_MOUSE_MOTION
 };
 
+// When calling BeginFrame specify whether we are going to render to the screen or a surface
+// this is for the portmaster scaling
+enum BeginFrameType {
+  BFT_SCREEN,
+  BFT_SURFACE
+};
+
 // Which type of mutually exclusive background should we display?
 enum GraphicsBackgroundType { BACKGROUND_DC0, BACKGROUND_HIK };
 
@@ -330,7 +337,7 @@ class GraphicsSystem : public EventListener {
   void mark_object_state_as_dirty() { object_state_dirty_ = true; }
   bool object_state_dirty() const { return object_state_dirty_; }
 
-  virtual void BeginFrame() = 0;
+  virtual void BeginFrame(BeginFrameType mode) = 0;
   virtual void EndFrame() = 0;
   virtual std::shared_ptr<Surface> EndFrameToSurface() = 0;
 
@@ -351,6 +358,19 @@ class GraphicsSystem : public EventListener {
   // Returns a rectangle with an origin of (0,0) and a size returned by
   // screen_size().
   const Rect& screen_rect() const { return screen_rect_; }
+
+#ifdef PLATFORM_PORTMASTER
+  // Returns the real size of the window in pixels.
+  const Size& real_screen_size() const { return real_screen_size_; }
+  const Rect& real_screen_rect() const { return real_screen_rect_; }
+  const float real_screen_scale() const { return real_screen_scale_; }
+  const int real_screen_offset_x() const {
+    return (int)(real_screen_size().width()  - (screen_size().width()  * real_screen_scale())) / 2;
+  }
+  const int real_screen_offset_y() const {
+    return (int)(real_screen_size().height() - (screen_size().height() * real_screen_scale())) / 2;
+  }
+#endif
 
   virtual void AllocateDC(int dc, Size size) = 0;
   virtual void SetMinimumSizeForDC(int dc, Size size) = 0;
@@ -516,6 +536,14 @@ class GraphicsSystem : public EventListener {
 
   // Size of our display window.
   Size screen_size_;
+
+#ifdef PLATFORM_PORTMASTER
+  // Size of our actual display window.
+  Size real_screen_size_;
+  Rect real_screen_rect_;
+  float real_screen_scale_;
+  float real_screen_scale_inv_;
+#endif
 
   // Rectangle of the screen.
   Rect screen_rect_;

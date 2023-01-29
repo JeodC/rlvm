@@ -69,6 +69,10 @@ namespace gcn
          */
         SDLInput();
 
+#ifdef PLATFORM_PORTMASTER
+        SDLInput(float scale, int offset_x, int offset_y);
+#endif
+
         /**
          * Pushes an SDL event. It should be called at least once per frame to
          * update input with user input.
@@ -119,6 +123,11 @@ namespace gcn
 
         bool mMouseDown;
         bool mMouseInWindow;
+#ifdef PLATFORM_PORTMASTER
+        float mScale = 1.0;
+        int mOffsetX = 0;
+        int mOffsetY = 0;
+#endif
     };
 }
 
