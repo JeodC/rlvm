@@ -402,10 +402,18 @@ void System::DumpRenderTree(RLMachine& machine) {
 
 boost::filesystem::path System::GetHomeDirectory() {
   std::string drive, home;
+
   char* homeptr = getenv("HOME");
   char* driveptr = getenv("HOMEDRIVE");
   char* homepathptr = getenv("HOMEPATH");
   char* profileptr = getenv("USERPROFILE");
+#ifdef PLATFORM_PORTMASTER
+  char *homeportmaster = getenv("PORTMASTER_GAMEPATH");
+  if (homeportmaster != 0 && (home = homeportmaster) != "") {
+    // UN*X like home directory
+    return fs::path(home);
+  }
+#endif
   if (homeptr != 0 && (home = homeptr) != "") {
     // UN*X like home directory
     return fs::path(home);
