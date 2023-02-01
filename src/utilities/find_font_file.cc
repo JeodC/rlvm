@@ -66,7 +66,7 @@ fs::path FindFontFile(System& system) {
     printf("not found\n");
   }
 
-  char* homeptr = getenv("HOME");
+  char* homeptr = getenv("PORTMASTER_GAMEPATH");
   fs::path home;
 
   if (homeptr != 0)
