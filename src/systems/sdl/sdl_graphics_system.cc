@@ -106,7 +106,7 @@ void SDLGraphicsSystem::BeginFrame(BeginFrameType mode) {
   glLoadIdentity();
   DebugShowGLErrors();
 
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
   if (mode == BFT_SCREEN) {
     // Portmaster hack to scale the screen.
     glTranslatef(real_screen_offset_x(), real_screen_offset_y(), 0);
@@ -298,7 +298,7 @@ void SDLGraphicsSystem::SetupVideo() {
   video_flags |= SDL_GL_DOUBLEBUFFER;  // Enable double buffering
   video_flags |= SDL_SWSURFACE;
 
-  if (screen_mode() == 0)
+  // if (screen_mode() == 0)
     video_flags |= SDL_FULLSCREEN;
 
   // Sets up OpenGL double buffering

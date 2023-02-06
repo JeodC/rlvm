@@ -876,7 +876,7 @@ std::shared_ptr<MouseCursor> GraphicsSystem::GetCurrentCursor() {
 // -----------------------------------------------------------------------
 
 void GraphicsSystem::SetScreenSize(const Size& size) {
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
   char *value;
   std::string value_str;
   Size temp_size(size.width(), size.height());
@@ -909,7 +909,9 @@ void GraphicsSystem::SetScreenSize(const Size& size) {
     real_screen_scale_inv_ = scale_h_inv;
   }
 
-  printf("%dx%d -> %dx%d -> %.3f", size.width(), size.height(), temp_size.width(), temp_size.height(), real_screen_scale_);
+  printf("Game Size: %d x %d, Screen Size: %d x %d, Scale: %.3f\n",
+    size.width(), size.height(),
+    temp_size.width(), temp_size.height(), real_screen_scale_);
 
   real_screen_size_ = temp_size;
   real_screen_rect_ = Rect(Point(0, 0), temp_size);

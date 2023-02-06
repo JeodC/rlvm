@@ -359,11 +359,13 @@ class GraphicsSystem : public EventListener {
   // screen_size().
   const Rect& screen_rect() const { return screen_rect_; }
 
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
   // Returns the real size of the window in pixels.
+  const Size& real_screen_real_size() const { return real_screen_size_; }
   const Size& real_screen_size() const { return real_screen_size_; }
   const Rect& real_screen_rect() const { return real_screen_rect_; }
   const float real_screen_scale() const { return real_screen_scale_; }
+  const float real_screen_scale_inv() const { return real_screen_scale_; }
   const int real_screen_offset_x() const {
     return (int)(real_screen_size().width()  - (screen_size().width()  * real_screen_scale())) / 2;
   }
@@ -537,7 +539,7 @@ class GraphicsSystem : public EventListener {
   // Size of our display window.
   Size screen_size_;
 
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
   // Size of our actual display window.
   Size real_screen_size_;
   Rect real_screen_rect_;

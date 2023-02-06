@@ -97,7 +97,7 @@ class GCNGraphics : public gcn::OpenGLGraphics {
  public:
   // Initializes the graphics with the current screen resolution.
   GCNGraphics(int width, int height);
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
   GCNGraphics(int width, int height, float scale, int offset_x, int offset_y);
 #endif
   ~GCNGraphics();

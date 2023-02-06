@@ -45,7 +45,7 @@ GCNWindow::~GCNWindow() {}
 // -----------------------------------------------------------------------
 
 void GCNWindow::centerInWindow(const Size& screen_size) {
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
   setPosition(
     (int)(((float)(screen_size.width()) / 2) - (((float)(getWidth()) / platform_->scale()) / 2)) + platform_->offset_x(),
     (int)(((float)(screen_size.height()) / 2) - (((float)(getHeight()) / platform_->scale()) / 2)) + platform_->offset_y());

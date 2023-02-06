@@ -69,7 +69,7 @@ namespace gcn
          */
         SDLInput();
 
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
         SDLInput(float scale, int offset_x, int offset_y);
 #endif
 
@@ -123,7 +123,7 @@ namespace gcn
 
         bool mMouseDown;
         bool mMouseInWindow;
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
         float mScale = 1.0;
         int mOffsetX = 0;
         int mOffsetY = 0;

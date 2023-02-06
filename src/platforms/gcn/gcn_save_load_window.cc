@@ -147,7 +147,7 @@ GCNSaveLoadWindow::GCNSaveLoadWindow(RLMachine& machine,
       model_(new SaveGameListModel("NO DATA", machine)),
       type_(type) {
 
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
   setSize((int)(540.0 * platform->scale()), (int)(400.0 * platform->scale()));
 #else
   setSize(540, 400);

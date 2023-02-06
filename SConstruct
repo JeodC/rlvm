@@ -19,7 +19,9 @@ AddOption('--fullstatic', action='store_true',
 AddOption('--puresdl', action='store_true',
           help='Builds a release that only uses sdl, no gtk')
 AddOption('--portmaster', action='store_true',
-          help='Builds a version with hacks to work inf PortMaster')
+          help='Builds a version with hacks to work in PortMaster')
+AddOption('--resfix', action='store_true',
+          help='Builds a version with hacks for resolution scaling -- currently broken.')
 
 # Set libraries used by all configurations and all binaries in rlvm.
 env = Environment(
@@ -305,6 +307,9 @@ if env['PLATFORM'] == 'darwin':
 #########################################################################
 if GetOption("portmaster"):
   env.Append(CPPDEFINES=['PLATFORM_PORTMASTER'])
+
+if GetOption("resfix"):
+  env.Append(CPPDEFINES=['RESOLUTION_INDEPENDENCE'])
 
 #########################################################################
 ## Building subcomponent functions

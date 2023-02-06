@@ -205,7 +205,7 @@ class GCNPlatformBlocker : public LongOperation,
 // -----------------------------------------------------------------------
 // GCNPlatform
 // -----------------------------------------------------------------------
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
 GCNPlatform::GCNPlatform(System& system, const Rect& screen_size, const float scale, int offset_x, int offset_y)
     : Platform(system.gameexe()), blocker_(NULL), screen_size_(screen_size), scale_(scale), offset_x_(offset_x), offset_y_(offset_y) {
   initializeGuichan(system, screen_size);
@@ -364,7 +364,7 @@ void GCNPlatform::initializeGuichan(System& system, const Rect& screen_size) {
   sdl_image_loader_.reset(new gcn::OpenGLSDLImageLoader());
   gcn::Image::setImageLoader(sdl_image_loader_.get());
 
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
   sdl_input_.reset(new gcn::SDLInput(scale_, offset_x_, offset_y_));
 #else
   sdl_input_.reset(new gcn::SDLInput());
@@ -387,7 +387,7 @@ void GCNPlatform::initializeGuichan(System& system, const Rect& screen_size) {
   guichan_gui_->setTop(toplevel_container_.get());
 
   fs::path font_file = FindFontFile(system);
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
   global_font_.reset(new GCNTrueTypeFont(font_file.string().c_str(), (int)(12.0 * scale_)));
 #else
   global_font_.reset(new GCNTrueTypeFont(font_file.string().c_str(), 12));

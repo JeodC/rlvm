@@ -55,14 +55,14 @@ namespace gcn
     {
         mMouseInWindow = true;
         mMouseDown = false;
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
         mScale = 1.0;
         mOffsetX = 0;
         mOffsetY = 0;
 #endif
     }
 
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
     SDLInput::SDLInput(float scale, int offset_x, int offset_y)
     {
         mMouseInWindow = true;
@@ -166,7 +166,7 @@ namespace gcn
 
             case SDL_MOUSEBUTTONDOWN:
                 mMouseDown = true;
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
                 mouseInput.setX((int)((float)(event.button.x) * mScale) + mOffsetX);
                 mouseInput.setY((int)((float)(event.button.y) * mScale) + mOffsetY);
 #else
@@ -193,7 +193,7 @@ namespace gcn
 
             case SDL_MOUSEBUTTONUP:
                 mMouseDown = false;
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
                 printf("Button -> %d x %d -> %d x %d\n",
                   event.button.x, event.button.y,
                   (int)((float)(event.button.x) * mScale) + mOffsetX,
@@ -213,7 +213,7 @@ namespace gcn
                 break;
 
             case SDL_MOUSEMOTION:
-#ifdef PLATFORM_PORTMASTER
+#ifdef RESOLUTION_INDEPENDENCE
                 mouseInput.setX((int)((float)(event.button.x) * mScale) + mOffsetX);
                 mouseInput.setY((int)((float)(event.button.y) * mScale) + mOffsetY);
 #else
