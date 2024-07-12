@@ -78,19 +78,21 @@ int GetMaxTextureSize() {
 
 int SafeSize(int i) {
   const GLint max_texture_size = GetMaxTextureSize();
-  if (i > max_texture_size)
-    return max_texture_size;
 
+  // Check if NPOT textures are safe to use
   if (IsNPOTSafe()) {
-    return i;
+    // If NPOT textures are safe, return the requested size 'i' directly
+    return i <= max_texture_size ? i : max_texture_size;
   }
 
-  for (int p = 0; p < 24; p++) {
-    if (i <= (1 << p))
-      return 1 << p;
+  // If NPOT textures are not safe, find the nearest power of two
+  int nearest_pow2 = 1;
+  while (nearest_pow2 < i && nearest_pow2 <= max_texture_size) {
+    nearest_pow2 <<= 1; // Shift left to find the next power of two
   }
 
-  return max_texture_size;
+  // Return the nearest power of two within the hardware limit
+  return nearest_pow2 <= max_texture_size ? nearest_pow2 : max_texture_size;
 }
 
 // -----------------------------------------------------------------------

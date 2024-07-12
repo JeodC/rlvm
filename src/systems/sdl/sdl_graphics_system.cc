@@ -34,7 +34,6 @@
 
 #if !defined(__APPLE__) && !defined(_WIN32)
 #include <SDL/SDL_image.h>
-#include "../resources/48/rlvm_icon_48.xpm"
 #endif
 
 #include <boost/algorithm/string.hpp>
@@ -94,13 +93,13 @@ void SDLGraphicsSystem::BeginFrame(BeginFrameType mode) {
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(0.0,
-          (GLdouble)screen_size().width(),
-          (GLdouble)screen_size().height(),
-          0.0,
-          0.0,
-          1.0);
+  glOrtho(0.0, screen_size().width(), screen_size().height(), 0.0, 0.0, 1.0);
   DebugShowGLErrors();
+
+  // If we don't set a viewport here, the screen will be stretched to the window size when set to native 1280x960 resolution.
+  // But then the textures behind the textbox are broken. Don't set a viewport for now in hopes of fixing the single problem instead of having to
+  // develop a whole scaling solution.
+  // glViewport(0, 0, screen_size().width(), screen_size().height());
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
@@ -140,15 +139,7 @@ void SDLGraphicsSystem::EndFrame() {
     // and I've just been lucky that the Intel i810 and whatever my Mac machine
     // has have been doing things that way.)
     glBindTexture(GL_TEXTURE_2D, screen_contents_texture_);
-    glCopyTexSubImage2D(GL_TEXTURE_2D,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        screen_size().width(),
-                        screen_size().height()
-                        );
+    glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, screen_size().width(), screen_size().height());
     screen_contents_texture_valid_ = true;
   } else {
     screen_contents_texture_valid_ = false;
@@ -247,25 +238,11 @@ SDLGraphicsSystem::SDLGraphicsSystem(System& system, Gameexe& gameexe)
 
   SetupVideo();
 
-  // Now we allocate the first two display contexts with equal size to
-  // the display
+  // Now we allocate the first two display contexts with equal size to the display
   display_contexts_[0]->allocate(screen_size(), true);
   display_contexts_[1]->allocate(screen_size());
 
   SetWindowTitle();
-
-#if !defined(__APPLE__) && !defined(_WIN32)
-  // We only set the icon on Linux because OSX will use the icns file
-  // automatically and this doesn't look too awesome.
-  SDL_Surface* icon = IMG_ReadXPMFromArray(rlvm_icon_48);
-  if (icon) {
-    SDL_SetColorKey(icon,
-                    SDL_SRCCOLORKEY,
-                    SDL_MapRGB(icon->format, 255, 255, 255));
-    SDL_WM_SetIcon(icon, NULL);
-    SDL_FreeSurface(icon);
-  }
-#endif
 
   // When debug is set, display trace data in the titlebar
   if (gameexe("MEMORY").Exists()) {
@@ -297,9 +274,7 @@ void SDLGraphicsSystem::SetupVideo() {
   video_flags = SDL_OPENGL;            // Enable OpenGL in SDL
   video_flags |= SDL_GL_DOUBLEBUFFER;  // Enable double buffering
   video_flags |= SDL_SWSURFACE;
-
-  // if (screen_mode() == 0)
-    video_flags |= SDL_FULLSCREEN;
+  video_flags |= SDL_FULLSCREEN;
 
   // Sets up OpenGL double buffering
   SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -308,16 +283,13 @@ void SDLGraphicsSystem::SetupVideo() {
   SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
   // Set the video mode
-  if ((screen_ = SDL_SetVideoMode(
-           screen_size().width(), screen_size().height(), bpp, video_flags)) ==
-      0) {
-    // This could happen for a variety of reasons,
-    // including DISPLAY not being set, the specified
-    // resolution not being available, etc.
+  if ((screen_ = SDL_SetVideoMode(screen_size().width(), screen_size().height(), bpp, video_flags)) == 0) {
+    // This could happen for a variety of reasons, including DISPLAY not being set, the specified resolution not being available, etc.
     std::ostringstream ss;
     ss << "Video mode set failed: " << SDL_GetError();
     throw SystemError(ss.str());
   }
+  printf("SDL Window is: %d x %d\n", screen_size().width(), screen_size().height());
 
   // Initialize glew
   GLenum err = glewInit();
@@ -364,16 +336,7 @@ void SDLGraphicsSystem::SetupVideo() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   screen_tex_width_ = SafeSize(screen_size().width());
   screen_tex_height_ = SafeSize(screen_size().height());
-  glTexImage2D(GL_TEXTURE_2D,
-               0,
-               GL_RGBA,
-               screen_tex_width_,
-               screen_tex_height_,
-               0,
-               GL_RGB,
-               GL_UNSIGNED_BYTE,
-               NULL);
-
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, screen_tex_width_, screen_tex_height_, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
   ShowGLErrors();
 }
 
@@ -540,20 +503,9 @@ typedef enum { NO_MASK, ALPHA_MASK, COLOR_MASK } MaskType;
 #define DefaultAmask 0xff000000
 #define DefaultBpp 32
 
-static SDL_Surface* newSurfaceFromRGBAData(int w,
-                                           int h,
-                                           char* data,
-                                           MaskType with_mask) {
+static SDL_Surface* newSurfaceFromRGBAData(int w, int h, char* data, MaskType with_mask) {
   int amask = (with_mask == ALPHA_MASK) ? DefaultAmask : 0;
-  SDL_Surface* tmp = SDL_CreateRGBSurfaceFrom(data,
-                                              w,
-                                              h,
-                                              DefaultBpp,
-                                              w * 4,
-                                              DefaultRmask,
-                                              DefaultGmask,
-                                              DefaultBmask,
-                                              amask);
+  SDL_Surface* tmp = SDL_CreateRGBSurfaceFrom(data, w, h, DefaultBpp, w * 4, DefaultRmask, DefaultGmask, DefaultBmask, amask);
 
   // We now need to convert this surface to a format suitable for use across
   // the rest of the program. We can't (regretfully) rely on
@@ -673,7 +625,6 @@ std::shared_ptr<const Surface> SDLGraphicsSystem::LoadSurfaceFromFile(
         globals().tone_curves.GetEffect(effect_no / 10 - 1),
         Rect(Point(0, 0), Size(conv->Width(), conv->Height())));
   }
-
   return surface_to_ret;
 }
 

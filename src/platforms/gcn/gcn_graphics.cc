@@ -83,47 +83,19 @@ void GCNGraphics::drawImageRect(int x, int y, int w, int h, ImageRect& i) {
   gcn::Image* image = i.image();
 
   // Draw the center area
-  drawImageStretched(image,
-                     i.center(),
-                     i.topLeft().width(),
-                     i.topLeft().height(),
-                     w - i.topLeft().width() - i.topRight().width(),
-                     h - i.topLeft().height() - i.bottomLeft().height());
+  drawImageStretched(image, i.center(), i.topLeft().width(), i.topLeft().height(), w - i.topLeft().width() - i.topRight().width(), h - i.topLeft().height() - i.bottomLeft().height());
 
   // Draw the sides
-  drawImageStretched(image,
-                     i.top(),
-                     i.left().width(),
-                     0,
-                     w - i.left().width() - i.right().width(),
-                     i.top().height());
-  drawImageStretched(image,
-                     i.bottom(),
-                     i.left().width(),
-                     h - i.bottom().height(),
-                     w - i.left().width() - i.right().width(),
-                     i.bottom().height());
-  drawImageStretched(image,
-                     i.left(),
-                     0,
-                     i.top().height(),
-                     i.left().width(),
-                     h - i.top().height() - i.bottom().height());
-  drawImageStretched(image,
-                     i.right(),
-                     w - i.right().width(),
-                     i.top().height(),
-                     i.right().width(),
-                     h - i.top().height() - i.bottom().height());
+  drawImageStretched(image, i.top(), i.left().width(), 0, w - i.left().width() - i.right().width(), i.top().height());
+  drawImageStretched(image, i.bottom(), i.left().width(), h - i.bottom().height(), w - i.left().width() - i.right().width(), i.bottom().height());
+  drawImageStretched(image, i.left(), 0, i.top().height(), i.left().width(), h - i.top().height() - i.bottom().height());
+  drawImageStretched(image, i.right(), w - i.right().width(), i.top().height(), i.right().width(), h - i.top().height() - i.bottom().height());
 
   // Draw the corners
   drawImageImpl(image, i.topLeft(), 0, 0);
   drawImageImpl(image, i.topRight(), w - i.topRight().width(), 0);
   drawImageImpl(image, i.bottomLeft(), 0, h - i.bottomLeft().height());
-  drawImageImpl(image,
-                i.bottomRight(),
-                w - i.bottomRight().width(),
-                h - i.bottomRight().height());
+  drawImageImpl(image, i.bottomRight(), w - i.bottomRight().width(), h - i.bottomRight().height());
 
   popClipArea();
 }

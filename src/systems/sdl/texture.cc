@@ -68,22 +68,15 @@ int Texture::ScreenHeight() { return s_screen_height; }
 // -----------------------------------------------------------------------
 // Texture
 // -----------------------------------------------------------------------
-Texture::Texture(SDL_Surface* surface,
-                 int x,
-                 int y,
-                 int w,
-                 int h,
-                 unsigned int bytes_per_pixel,
-                 int byte_order,
-                 int byte_type)
+Texture::Texture(SDL_Surface* surface, int x, int y, int w, int h, unsigned int bytes_per_pixel, int byte_order, int byte_type)
     : x_offset_(x),
       y_offset_(y),
       logical_width_(w),
       logical_height_(h),
       total_width_(surface->w),
       total_height_(surface->h),
-      texture_width_(SafeSize(logical_width_)),
-      texture_height_(SafeSize(logical_height_)),
+      texture_width_(w),
+      texture_height_(h),
       back_texture_id_(0),
       is_upside_down_(false) {
   glGenTextures(1, &texture_id_);
@@ -96,26 +89,10 @@ Texture::Texture(SDL_Surface* surface,
 
   if (w == total_width_ && h == total_height_) {
     SDL_LockSurface(surface);
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 bytes_per_pixel,
-                 texture_width_,
-                 texture_height_,
-                 0,
-                 byte_order,
-                 byte_type,
-                 NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, bytes_per_pixel, texture_width_, texture_height_, 0, byte_order, byte_type, NULL);
     DebugShowGLErrors();
 
-    glTexSubImage2D(GL_TEXTURE_2D,
-                    0,
-                    0,
-                    0,
-                    surface->w,
-                    surface->h,
-                    byte_order,
-                    byte_type,
-                    surface->pixels);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, surface->w, surface->h, byte_order, byte_type, surface->pixels);
     DebugShowGLErrors();
 
     SDL_UnlockSurface(surface);
@@ -139,19 +116,10 @@ Texture::Texture(SDL_Surface* surface,
     }
     SDL_UnlockSurface(surface);
 
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 bytes_per_pixel,
-                 texture_width_,
-                 texture_height_,
-                 0,
-                 byte_order,
-                 byte_type,
-                 NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, bytes_per_pixel, texture_width_, texture_height_, 0, byte_order, byte_type, NULL);
     DebugShowGLErrors();
 
-    glTexSubImage2D(
-        GL_TEXTURE_2D, 0, 0, 0, w, h, byte_order, byte_type, pixel_data);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, byte_order, byte_type, pixel_data);
     DebugShowGLErrors();
   }
 }
@@ -182,19 +150,10 @@ Texture::Texture(render_to_texture, int width, int height)
   texture_height_ = SafeSize(logical_height_);
 
   // This may fail.
-  glTexImage2D(GL_TEXTURE_2D,
-               0,
-               GL_RGBA,
-               texture_width_,
-               texture_height_,
-               0,
-               GL_RGB,
-               GL_UNSIGNED_BYTE,
-               NULL);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_width_, texture_height_, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
   DebugShowGLErrors();
 
-  glCopyTexSubImage2D(
-      GL_TEXTURE_2D, 0, 0, 0, 0, 0, logical_width_, logical_height_);
+  glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, logical_width_, logical_height_);
   DebugShowGLErrors();
 }
 
@@ -222,30 +181,13 @@ char* Texture::uploadBuffer(unsigned int size) {
 
 // -----------------------------------------------------------------------
 
-void Texture::reupload(SDL_Surface* surface,
-                       int offset_x,
-                       int offset_y,
-                       int x,
-                       int y,
-                       int w,
-                       int h,
-                       unsigned int bytes_per_pixel,
-                       int byte_order,
-                       int byte_type) {
+void Texture::reupload(SDL_Surface* surface, int offset_x, int offset_y, int x, int y, int w, int h, unsigned int bytes_per_pixel, int byte_order, int byte_type) {
   glBindTexture(GL_TEXTURE_2D, texture_id_);
 
   if (w == total_width_ && h == total_height_) {
     SDL_LockSurface(surface);
 
-    glTexSubImage2D(GL_TEXTURE_2D,
-                    0,
-                    0,
-                    0,
-                    surface->w,
-                    surface->h,
-                    byte_order,
-                    byte_type,
-                    surface->pixels);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, surface->w, surface->h, byte_order, byte_type, surface->pixels);
     DebugShowGLErrors();
 
     SDL_UnlockSurface(surface);
@@ -269,15 +211,7 @@ void Texture::reupload(SDL_Surface* surface,
     }
     SDL_UnlockSurface(surface);
 
-    glTexSubImage2D(GL_TEXTURE_2D,
-                    0,
-                    offset_x,
-                    offset_y,
-                    w,
-                    h,
-                    byte_order,
-                    byte_type,
-                    pixel_data);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, offset_x, offset_y, w, h, byte_order, byte_type, pixel_data);
     DebugShowGLErrors();
   }
 }
@@ -343,12 +277,8 @@ void Texture::RenderToScreen(const Rect& src, const Rect& dst, int opacity) {
 
 // -----------------------------------------------------------------------
 
-// TODO(erg): A function of this hairiness needs super more amounts of
-// documentation.
-void Texture::RenderToScreenAsColorMask(const Rect& src,
-                                        const Rect& dst,
-                                        const RGBAColour& rgba,
-                                        int filter) {
+// TODO(erg): A function of this hairiness needs super more amounts of documentation.
+void Texture::RenderToScreenAsColorMask(const Rect& src, const Rect& dst, const RGBAColour& rgba, int filter) {
   if (filter == 0) {
     if (GLEW_ARB_fragment_shader && GLEW_ARB_multitexture) {
       render_to_screen_as_colour_mask_subtractive_glsl(src, dst, rgba);
@@ -381,11 +311,9 @@ void Texture::render_to_screen_as_colour_mask_subtractive_glsl(
     thisy2 = float(logical_height_ - y2) / texture_height_;
   }
 
-  // If we haven't already, allocate video memory for the back
-  // texture.
+  // If we haven't already, allocate video memory for the back texture.
   //
-  // NOTE: Does this code deal with changing the dimensions of the
-  // text box? Does it matter?
+  // NOTE: Does this code deal with changing the dimensions of the text box? Does it matter?
   if (back_texture_id_ == 0) {
     glGenTextures(1, &back_texture_id_);
     glBindTexture(GL_TEXTURE_2D, back_texture_id_);
@@ -393,15 +321,7 @@ void Texture::render_to_screen_as_colour_mask_subtractive_glsl(
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     // Generate this texture
-    glTexImage2D(GL_TEXTURE_2D,
-                 0,
-                 GL_RGBA,
-                 texture_width_,
-                 texture_height_,
-                 0,
-                 GL_RGB,
-                 GL_UNSIGNED_BYTE,
-                 NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_width_, texture_height_, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     DebugShowGLErrors();
   }
 
@@ -410,8 +330,7 @@ void Texture::render_to_screen_as_colour_mask_subtractive_glsl(
   glBindTexture(GL_TEXTURE_2D, back_texture_id_);
   int ystart = int(s_screen_height - fdy1 - (fdy2 - fdy1));
   int idx1 = int(fdx1);
-  glCopyTexSubImage2D(
-      GL_TEXTURE_2D, 0, 0, 0, idx1, ystart, texture_width_, texture_height_);
+  glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, idx1, ystart, texture_width_, texture_height_);
   DebugShowGLErrors();
 
   glUseProgramObjectARB(Shaders::getColorMaskProgram());
@@ -461,12 +380,9 @@ void Texture::render_to_screen_as_colour_mask_subtractive_glsl(
 
 // -----------------------------------------------------------------------
 
-// This fallback does not accurately render the scene according to
-// standard RealLive. This only negatively shades according to the
-// alpha value, ignoring the rest of the \#WINDOW_ATTR colour.
-//
-// This will probably only occur with mesa software and people with
-// graphics cards > 5 years old.
+// This fallback does not accurately render the scene according to standard RealLive. 
+// This only negatively shades according to the alpha value, ignoring the rest of the \#WINDOW_ATTR colour.
+// This will probably only occur with mesa software and people with graphics cards > 5 years old.
 void Texture::render_to_screen_as_colour_mask_subtractive_fallback(
     const Rect& src,
     const Rect& dst,
@@ -489,10 +405,8 @@ void Texture::render_to_screen_as_colour_mask_subtractive_fallback(
   // First draw the mask
   glBindTexture(GL_TEXTURE_2D, texture_id_);
 
-  /// SERIOUS WTF: gl_blend_func_separate causes a segmentation fault
-  /// under the current i810 driver for linux.
-  //  glBlendFuncSeparate(GL_SRC_ALPHA_SATURATE, GL_ONE_MINUS_SRC_ALPHA,
-  //                      GL_SRC_COLOR, GL_ONE_MINUS_SRC_ALPHA);
+  // SERIOUS WTF -- gl_blend_func_separate causes a segmentation fault under the current i810 driver for linux.
+  // glBlendFuncSeparate(GL_SRC_ALPHA_SATURATE, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_COLOR, GL_ONE_MINUS_SRC_ALPHA);
   glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE_MINUS_SRC_ALPHA);
 
   glBegin(GL_QUADS);
@@ -514,9 +428,7 @@ void Texture::render_to_screen_as_colour_mask_subtractive_fallback(
 
 // -----------------------------------------------------------------------
 
-void Texture::render_to_screen_as_colour_mask_additive(const Rect& src,
-                                                       const Rect& dst,
-                                                       const RGBAColour& rgba) {
+void Texture::render_to_screen_as_colour_mask_additive(const Rect& src, const Rect& dst, const RGBAColour& rgba) {
   int x1 = src.x(), y1 = src.y(), x2 = src.x2(), y2 = src.y2();
   int fdx1 = dst.x(), fdy1 = dst.y(), fdx2 = dst.x2(), fdy2 = dst.y2();
   if (!filterCoords(x1, y1, x2, y2, fdx1, fdy1, fdx2, fdy2))
@@ -555,9 +467,7 @@ void Texture::render_to_screen_as_colour_mask_additive(const Rect& src,
 
 // -----------------------------------------------------------------------
 
-void Texture::RenderToScreen(const Rect& src,
-                             const Rect& dst,
-                             const int opacity[4]) {
+void Texture::RenderToScreen(const Rect& src, const Rect& dst, const int opacity[4]) {
   // For the time being, we are dumb and assume that it's one texture
   int x1 = src.x(), y1 = src.y(), x2 = src.x2(), y2 = src.y2();
   int fdx1 = dst.x(), fdy1 = dst.y(), fdx2 = dst.x2(), fdy2 = dst.y2();
@@ -598,16 +508,10 @@ void Texture::RenderToScreen(const Rect& src,
 
 // -----------------------------------------------------------------------
 
-void Texture::RenderToScreenAsObject(const GraphicsObject& go,
-                                     const SDLSurface& surface,
-                                     const Rect& srcRect,
-                                     const Rect& dstRect,
-                                     int alpha) {
-  // This all needs to be pushed up out of the rendering code and down into
-  // either GraphicsObject or the individual GraphicsObjectData subclasses.
+void Texture::RenderToScreenAsObject(const GraphicsObject& go, const SDLSurface& surface, const Rect& srcRect, const Rect& dstRect, int alpha) {
+  // This all needs to be pushed up out of the rendering code and down into either GraphicsObject or the individual GraphicsObjectData subclasses.
 
-  // TODO(erg): Temporary hack while I wait to convert all of this machinery to
-  // Rects.
+  // TODO(erg): Temporary hack while I wait to convert all of this machinery to Rects.
   int xSrc1 = srcRect.x();
   int ySrc1 = srcRect.y();
   int xSrc2 = srcRect.x2();
@@ -643,9 +547,8 @@ void Texture::RenderToScreenAsObject(const GraphicsObject& go,
     glRotatef(float(go.rotation()) / 10, 0, 0, 1);
     glTranslatef(-x_rep, -y_rep, 0);
 
-    // RealLive has its own complex shading/tinting system which we implement
-    // in a shader if available. It's costly enough that we make sure we need
-    // to use it.
+    // RealLive has its own complex shading/tinting system which we implement in a shader if available.
+    // It's costly enough that we make sure we need to use it.
     bool using_shader = false;
     if ((go.light() || go.tint() != RGBColour::Black() ||
          go.colour() != RGBAColour::Clear() || go.mono() || go.invert()) &&
@@ -666,13 +569,11 @@ void Texture::RenderToScreenAsObject(const GraphicsObject& go,
       // Our final blending color has to be all white here.
       using_shader = true;
     } else {
-      // The shader takes care of the alpha for us, so we need to specify when
-      // not using it.
+      // The shader takes care of the alpha for us, so we need to specify when not using it.
       glColor4ub(255, 255, 255, alpha);
     }
 
-    // Make this so that when we have composite 1, we're doing a pure
-    // additive blend, (ignoring the alpha channel?)
+    // Make this so that when we have composite 1, we're doing a pure additive blend, (ignoring the alpha channel?)
     switch (go.composite_mode()) {
       case 0:
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -723,14 +624,7 @@ static float our_round(float r) {
   return (r > 0.0f) ? floor(r + 0.5f) : ceil(r - 0.5f);
 }
 
-bool Texture::filterCoords(int& x1,
-                           int& y1,
-                           int& x2,
-                           int& y2,
-                           int& dx1,
-                           int& dy1,
-                           int& dx2,
-                           int& dy2) {
+bool Texture::filterCoords(int& x1, int& y1, int& x2, int& y2, int& dx1, int& dy1, int& dx2, int& dy2) {
   // POINT
   using std::max;
   using std::min;
