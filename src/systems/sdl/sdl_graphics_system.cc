@@ -182,12 +182,8 @@ void SDLGraphicsSystem::RedrawLastFrame() {
       glVertex2i(dx1, dy2);
     }
     glEnd();
-
     DrawCursor();
-
     glFlush();
-
-    // Swap the buffers
     SDL_GL_SwapBuffers();
     ShowGLErrors();
   }
@@ -435,10 +431,8 @@ void SDLGraphicsSystem::AllocateDC(int dc, Size size) {
   // the screen.
   if (dc == 1) {
     SDL_Surface* dc0 = *(display_contexts_[0]);
-    if (size.width() < dc0->w)
-      size.set_width(dc0->w);
-    if (size.height() < dc0->h)
-      size.set_height(dc0->h);
+    size.set_width(dc0->w);
+    size.set_height(dc0->h);
   }
 
   // Allocate a new obj.

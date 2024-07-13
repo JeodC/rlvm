@@ -46,7 +46,6 @@
 SDLRenderToTextureSurface::SDLRenderToTextureSurface(SDLGraphicsSystem* system,
                                                      const Size& size)
     : texture_(new Texture(render_to_texture(), size.width(), size.height())) {
-  printf("SDLRenderToTextureSurface size: %d x %d\n", size.width(), size.height());
   registrar_.Add(this,
                  NotificationType::FULLSCREEN_STATE_CHANGED,
                  Source<GraphicsSystem>(system));
