@@ -66,7 +66,7 @@ bool ZoomLongOperation::operator()(RLMachine& machine) {
   } else {
     // Render to the screen
     GraphicsSystem& graphics = machine.system().graphics();
-    graphics.BeginFrame(BFT_SCREEN);
+    graphics.BeginFrame();
 
     // First blit the original dc0 to the screen
     orig_surface_->RenderToScreen(

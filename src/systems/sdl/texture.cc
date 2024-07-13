@@ -84,7 +84,7 @@ Texture::Texture(SDL_Surface* surface, int x, int y, int w, int h, unsigned int 
   DebugShowGLErrors();
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   if (w == total_width_ && h == total_height_) {
@@ -126,8 +126,8 @@ Texture::Texture(SDL_Surface* surface, int x, int y, int w, int h, unsigned int 
 
 // -----------------------------------------------------------------------
 
-Texture::Texture(render_to_texture, int width, int height)
-    : x_offset_(0),
+Texture::Texture(render_to_texture, int width, int height): 
+      x_offset_(0),
       y_offset_(0),
       logical_width_(width),
       logical_height_(height),
@@ -140,19 +140,15 @@ Texture::Texture(render_to_texture, int width, int height)
       is_upside_down_(true) {
   glGenTextures(1, &texture_id_);
   glBindTexture(GL_TEXTURE_2D, texture_id_);
-  DebugShowGLErrors();
-  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   texture_width_ = SafeSize(logical_width_);
   texture_height_ = SafeSize(logical_height_);
 
-  // This may fail.
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texture_width_, texture_height_, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-  DebugShowGLErrors();
-
   glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, logical_width_, logical_height_);
   DebugShowGLErrors();
 }

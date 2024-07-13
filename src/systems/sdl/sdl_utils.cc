@@ -107,7 +107,6 @@ void reportSDLError(const std::string& sdl_name,
 
 // -----------------------------------------------------------------------
 
-/// TODO(erg): This is not endian safe in any way.
 SDL_Surface* AlphaInvert(SDL_Surface* in_surface) {
   SDL_PixelFormat* format = in_surface->format;
 
@@ -115,7 +114,7 @@ SDL_Surface* AlphaInvert(SDL_Surface* in_surface) {
     throw SystemError("AlphaInvert requires an alpha channel!");
 
   // Build a copy of the surface
-  SDL_Surface* dst = SDL_AllocSurface(in_surface->flags,
+  SDL_Surface* dst = SDL_CreateRGBSurface(in_surface->flags,
                                       in_surface->w,
                                       in_surface->h,
                                       format->BitsPerPixel,

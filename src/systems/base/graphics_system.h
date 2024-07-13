@@ -117,13 +117,6 @@ enum GraphicsUpdateType {
   GUT_MOUSE_MOTION
 };
 
-// When calling BeginFrame specify whether we are going to render to the screen or a surface
-// this is for the portmaster scaling
-enum BeginFrameType {
-  BFT_SCREEN,
-  BFT_SURFACE
-};
-
 // Which type of mutually exclusive background should we display?
 enum GraphicsBackgroundType { BACKGROUND_DC0, BACKGROUND_HIK };
 
@@ -337,7 +330,7 @@ class GraphicsSystem : public EventListener {
   void mark_object_state_as_dirty() { object_state_dirty_ = true; }
   bool object_state_dirty() const { return object_state_dirty_; }
 
-  virtual void BeginFrame(BeginFrameType mode) = 0;
+  virtual void BeginFrame() = 0;
   virtual void EndFrame() = 0;
   virtual std::shared_ptr<Surface> EndFrameToSurface() = 0;
 

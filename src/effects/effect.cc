@@ -64,18 +64,21 @@ bool Effect::operator()(RLMachine& machine) {
   if (current_frame >= duration_ || fast_forward) {
     return true;
   } else {
+    // We don't have glOrtho here, so just forget this bit since it's the cause of a render bug.
+    /*
     GraphicsSystem& graphics = machine.system().graphics();
-
-    graphics.BeginFrame(BFT_SCREEN);      
+    graphics.BeginFrame();
     if (BlitOriginalImage()) {
       dst_surface().RenderToScreen(
           Rect(Point(0, 0), size()), Rect(Point(0, 0), size()), 255);
-    }
+    } 
 
     PerformEffectForTime(machine, current_frame);
 
     graphics.EndFrame();
     return false;
+    */
+   return true;
   }
 }
 

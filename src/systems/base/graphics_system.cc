@@ -472,13 +472,13 @@ const ObjectSettings& GraphicsSystem::GetObjectSettings(const int obj_num) {
 // -----------------------------------------------------------------------
 
 void GraphicsSystem::Refresh(std::ostream* tree) {
-  BeginFrame(BFT_SCREEN);
+  BeginFrame();
   DrawFrame(tree);
   EndFrame();
 }
 
 std::shared_ptr<Surface> GraphicsSystem::RenderToSurface() {
-  BeginFrame(BFT_SURFACE);
+  BeginFrame();
   DrawFrame(NULL);
   return EndFrameToSurface();
 }

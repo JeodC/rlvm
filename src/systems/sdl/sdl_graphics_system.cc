@@ -81,7 +81,7 @@ void SDLGraphicsSystem::SetCursor(int cursor) {
   SDL_ShowCursor(ShouldUseCustomCursor() ? SDL_DISABLE : SDL_ENABLE);
 }
 
-void SDLGraphicsSystem::BeginFrame(BeginFrameType mode) {
+void SDLGraphicsSystem::BeginFrame() {
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   DebugShowGLErrors();
@@ -95,23 +95,11 @@ void SDLGraphicsSystem::BeginFrame(BeginFrameType mode) {
   glLoadIdentity();
   glOrtho(0.0, screen_size().width(), screen_size().height(), 0.0, 0.0, 1.0);
   DebugShowGLErrors();
-
-  // If we don't set a viewport here, the screen will be stretched to the window size when set to native 1280x960 resolution.
-  // But then the textures behind the textbox are broken. Don't set a viewport for now in hopes of fixing the single problem instead of having to
-  // develop a whole scaling solution.
-  // glViewport(0, 0, screen_size().width(), screen_size().height());
+  //glViewport(0, 0, screen_size().width(), screen_size().height());
 
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   DebugShowGLErrors();
-
-#ifdef RESOLUTION_INDEPENDENCE
-  if (mode == BFT_SCREEN) {
-    // Portmaster hack to scale the screen.
-    glTranslatef(real_screen_offset_x(), real_screen_offset_y(), 0);
-    glScalef((GLfloat)real_screen_scale(), (GLfloat)real_screen_scale(), (GLfloat)0.f);
-  }
-#endif
 
   // Full screen shaking moves where the origin is.
   Point origin = GetScreenOrigin();
@@ -140,7 +128,7 @@ void SDLGraphicsSystem::EndFrame() {
     // has have been doing things that way.)
     glBindTexture(GL_TEXTURE_2D, screen_contents_texture_);
     glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, screen_size().width(), screen_size().height());
-    screen_contents_texture_valid_ = true;
+    screen_contents_texture_valid_ = false; // Causes flickering if true
   } else {
     screen_contents_texture_valid_ = false;
   }
@@ -202,8 +190,7 @@ void SDLGraphicsSystem::DrawCursor() {
 }
 
 std::shared_ptr<Surface> SDLGraphicsSystem::EndFrameToSurface() {
-  return std::shared_ptr<Surface>(
-      new SDLRenderToTextureSurface(this, screen_size()));
+  return std::shared_ptr<Surface>(new SDLRenderToTextureSurface(this, screen_size()));
 }
 
 // -----------------------------------------------------------------------
@@ -285,7 +272,6 @@ void SDLGraphicsSystem::SetupVideo() {
     ss << "Video mode set failed: " << SDL_GetError();
     throw SystemError(ss.str());
   }
-  printf("SDL Window is: %d x %d\n", screen_size().width(), screen_size().height());
 
   // Initialize glew
   GLenum err = glewInit();
@@ -341,12 +327,6 @@ SDLGraphicsSystem::~SDLGraphicsSystem() {}
 void SDLGraphicsSystem::ExecuteGraphicsSystem(RLMachine& machine) {
   // For now, nothing, but later, we need to put all code each cycle
   // here.
-#ifdef PLATFORM_PORTMASTER
-  if (is_responsible_for_update()) {
-    Refresh(NULL);
-    OnScreenRefreshed();
-  }
-#else
   if (is_responsible_for_update() && screen_needs_refresh()) {
     Refresh(NULL);
     OnScreenRefreshed();
@@ -355,7 +335,6 @@ void SDLGraphicsSystem::ExecuteGraphicsSystem(RLMachine& machine) {
     RedrawLastFrame();
     redraw_last_frame_ = false;
   }
-#endif
 
   // Update the seen.
   int current_time = machine.system().event().GetTicks();
@@ -600,8 +579,7 @@ std::shared_ptr<const Surface> SDLGraphicsSystem::LoadSurfaceFromFile(
     region_table.push_back(rect);
   }
 
-  std::shared_ptr<Surface> surface_to_ret(
-      new SDLSurface(this, s, region_table));
+  std::shared_ptr<Surface> surface_to_ret(new SDLSurface(this, s, region_table));
   // handle tone curve effect loading
   if (short_filename.find("?") != short_filename.npos) {
     std::string effect_no_str =

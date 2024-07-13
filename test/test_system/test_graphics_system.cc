@@ -139,7 +139,7 @@ ColourFilter* TestGraphicsSystem::BuildColourFiller() {
   return new MockColourFilter;
 }
 
-void TestGraphicsSystem::BeginFrame(BeginFrameType mode) {}
+void TestGraphicsSystem::BeginFrame() {}
 
 void TestGraphicsSystem::EndFrame() {}
 
