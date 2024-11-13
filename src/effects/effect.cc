@@ -64,18 +64,21 @@ bool Effect::operator()(RLMachine& machine) {
   if (current_frame >= duration_ || fast_forward) {
     return true;
   } else {
+    // We must disable effects here since they blit at a 4:3 aspect ratio and don't scale correctly for other aspects.
+    /*
     GraphicsSystem& graphics = machine.system().graphics();
 
     graphics.BeginFrame(BFT_SCREEN);      
     if (BlitOriginalImage()) {
-      dst_surface().RenderToScreen(
-          Rect(Point(0, 0), size()), Rect(Point(0, 0), size()), 255);
+      dst_surface().RenderToScreen(Rect(Point(0, 0), size()), Rect(Point(0, 0), size()), 255);
     }
 
     PerformEffectForTime(machine, current_frame);
 
     graphics.EndFrame();
     return false;
+    */
+    return true;
   }
 }
 
