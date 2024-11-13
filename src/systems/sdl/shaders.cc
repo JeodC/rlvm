@@ -26,10 +26,6 @@
 
 #include "GL/glew.h"
 
-#ifndef NDEBUG
-#include <iostream>
-#endif
-
 #include "systems/base/graphics_object.h"
 #include "systems/base/system_error.h"
 #include "systems/sdl/sdl_utils.h"
@@ -122,7 +118,7 @@ GLint Shaders::object_invert_ = 0;
 // static
 void Shaders::Reset() {
   if (color_mask_program_object_id_) {
-    glDeleteObjectARB(color_mask_program_object_id_);
+    glDeleteProgram(color_mask_program_object_id_);
     DebugShowGLErrors();
 
     color_mask_program_object_id_ = 0;
@@ -131,7 +127,7 @@ void Shaders::Reset() {
   }
 
   if (object_program_object_id_) {
-    glDeleteObjectARB(object_program_object_id_);
+    glDeleteProgram(object_program_object_id_);
     DebugShowGLErrors();
 
     object_program_object_id_ = 0;
@@ -157,7 +153,7 @@ GLuint Shaders::getColorMaskProgram() {
 GLint Shaders::getColorMaskUniformCurrentValues() {
   if (color_mask_current_values_ == 0) {
     color_mask_current_values_ =
-        glGetUniformLocationARB(getColorMaskProgram(), "current_values");
+        glGetUniformLocation(getColorMaskProgram(), "current_values");
     if (color_mask_current_values_ == -1)
       throw SystemError("Bad uniform value: current_values");
   }
@@ -167,7 +163,7 @@ GLint Shaders::getColorMaskUniformCurrentValues() {
 
 GLint Shaders::getColorMaskUniformMask() {
   if (color_mask_mask_ == 0) {
-    color_mask_mask_ = glGetUniformLocationARB(getColorMaskProgram(), "mask");
+    color_mask_mask_ = glGetUniformLocation(getColorMaskProgram(), "mask");
     if (color_mask_mask_ == -1)
       throw SystemError("Bad uniform value: mask");
   }
@@ -185,7 +181,7 @@ GLuint Shaders::GetObjectProgram() {
 
 GLint Shaders::GetObjectUniformImage() {
   if (object_image_ == 0) {
-    object_image_ = glGetUniformLocationARB(GetObjectProgram(), "image");
+    object_image_ = glGetUniformLocation(GetObjectProgram(), "image");
     if (object_image_ == -1)
       throw SystemError("Bad uniform value: image");
   }
@@ -195,28 +191,28 @@ GLint Shaders::GetObjectUniformImage() {
 
 void Shaders::loadObjectUniformFromGraphicsObject(const GraphicsObject& go) {
   RGBAColour colour = go.colour();
-  glUniform4fARB(Shaders::GetObjectUniformColour(),
+  glUniform4f(Shaders::GetObjectUniformColour(),
                  colour.r_float(),
                  colour.g_float(),
                  colour.b_float(),
                  colour.a_float());
 
   RGBColour tint = go.tint();
-  glUniform3fARB(Shaders::GetObjectUniformTint(),
+  glUniform3f(Shaders::GetObjectUniformTint(),
                  tint.r_float(),
                  tint.g_float(),
                  tint.b_float());
 
-  glUniform1fARB(Shaders::GetObjectUniformLight(), go.light() / 255.0f);
+  glUniform1f(Shaders::GetObjectUniformLight(), go.light() / 255.0f);
 
-  glUniform1fARB(Shaders::GetObjectUniformMono(), go.mono() / 255.0f);
+  glUniform1f(Shaders::GetObjectUniformMono(), go.mono() / 255.0f);
 
-  glUniform1fARB(Shaders::GetObjectUniformInvert(), go.invert() / 255.0f);
+  glUniform1f(Shaders::GetObjectUniformInvert(), go.invert() / 255.0f);
 }
 
 GLint Shaders::GetObjectUniformColour() {
   if (object_colour_ == 0) {
-    object_colour_ = glGetUniformLocationARB(GetObjectProgram(), "colour");
+    object_colour_ = glGetUniformLocation(GetObjectProgram(), "colour");
     if (object_colour_ == -1)
       throw SystemError("Bad uniform value: colour");
   }
@@ -226,7 +222,7 @@ GLint Shaders::GetObjectUniformColour() {
 
 GLint Shaders::GetObjectUniformTint() {
   if (object_tint_ == 0) {
-    object_tint_ = glGetUniformLocationARB(GetObjectProgram(), "tint");
+    object_tint_ = glGetUniformLocation(GetObjectProgram(), "tint");
     if (object_tint_ == -1)
       throw SystemError("Bad uniform value: tint");
   }
@@ -236,7 +232,7 @@ GLint Shaders::GetObjectUniformTint() {
 
 GLint Shaders::GetObjectUniformLight() {
   if (object_light_ == 0) {
-    object_light_ = glGetUniformLocationARB(GetObjectProgram(), "light");
+    object_light_ = glGetUniformLocation(GetObjectProgram(), "light");
     if (object_light_ == -1)
       throw SystemError("Bad uniform value: light");
   }
@@ -246,7 +242,7 @@ GLint Shaders::GetObjectUniformLight() {
 
 GLint Shaders::GetObjectUniformAlpha() {
   if (object_alpha_ == 0) {
-    object_alpha_ = glGetUniformLocationARB(GetObjectProgram(), "alpha");
+    object_alpha_ = glGetUniformLocation(GetObjectProgram(), "alpha");
     if (object_alpha_ == -1)
       throw SystemError("Bad uniform value: alpha");
   }
@@ -256,7 +252,7 @@ GLint Shaders::GetObjectUniformAlpha() {
 
 GLint Shaders::GetObjectUniformMono() {
   if (object_mono_ == 0) {
-    object_mono_ = glGetUniformLocationARB(GetObjectProgram(), "mono");
+    object_mono_ = glGetUniformLocation(GetObjectProgram(), "mono");
     if (object_mono_ == -1)
       throw SystemError("Bad uniform value: mono");
   }
@@ -266,7 +262,7 @@ GLint Shaders::GetObjectUniformMono() {
 
 GLint Shaders::GetObjectUniformInvert() {
   if (object_invert_ == 0) {
-    object_invert_ = glGetUniformLocationARB(GetObjectProgram(), "invert");
+    object_invert_ = glGetUniformLocation(GetObjectProgram(), "invert");
     if (object_invert_ == -1)
       throw SystemError("Bad uniform value: invert");
   }
@@ -275,33 +271,38 @@ GLint Shaders::GetObjectUniformInvert() {
 }
 
 // static
-void Shaders::buildShader(const char* shader, GLuint* program_object) {
-  GLuint shader_object = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-  DebugShowGLErrors();
+void Shaders::buildShader(const char* shaderSource, GLuint* program_object) {
+  GLuint shader = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(shader, 1, &shaderSource, NULL);
+  glCompileShader(shader);
 
-  glShaderSourceARB(shader_object, 1, &shader, NULL);
-  DebugShowGLErrors();
-
-  glCompileShaderARB(shader_object);
-  DebugShowGLErrors();
-
-#ifndef NDEBUG
-  GLint blen = 0;
-  GLsizei slen = 0;
-  glGetShaderiv(shader_object, GL_INFO_LOG_LENGTH, &blen);
-  if (blen > 1) {
-    GLchar* compiler_log = new GLchar[blen];
-    glGetInfoLogARB(shader_object, blen, &slen, compiler_log);
-    std::cout << "compiler_log: " << std::endl << compiler_log << std::endl;
-    delete[] compiler_log;
+  GLint compiled;
+  glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+  if (!compiled) {
+      GLint logLength;
+      glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logLength);
+      std::vector<GLchar> log(logLength);
+      glGetShaderInfoLog(shader, logLength, &logLength, log.data());
+      std::cerr << "Shader compilation failed: " << log.data() << std::endl;
+      glDeleteShader(shader);
+      return;
   }
-#endif
 
-  *program_object = glCreateProgramObjectARB();
-  glAttachObjectARB(*program_object, shader_object);
-  DebugShowGLErrors();
+  *program_object = glCreateProgram();
+  glAttachShader(*program_object, shader);
+  glLinkProgram(*program_object);
 
-  glLinkProgramARB(*program_object);
-  glDeleteObjectARB(shader_object);
-  ShowGLErrors();
+  GLint linked;
+  glGetProgramiv(*program_object, GL_LINK_STATUS, &linked);
+  if (!linked) {
+      GLint logLength;
+      glGetProgramiv(*program_object, GL_INFO_LOG_LENGTH, &logLength);
+      std::vector<GLchar> log(logLength);
+      glGetProgramInfoLog(*program_object, logLength, &logLength, log.data());
+      std::cerr << "Program linking failed: " << log.data() << std::endl;
+      glDeleteProgram(*program_object);
+      return;
+  }
+
+  glDeleteShader(shader);
 }

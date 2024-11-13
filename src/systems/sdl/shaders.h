@@ -28,6 +28,7 @@
 #define SRC_SYSTEMS_SDL_SHADERS_H_
 
 #include <SDL/SDL_opengl.h>
+#include <iostream>
 
 class GraphicsObject;
 
